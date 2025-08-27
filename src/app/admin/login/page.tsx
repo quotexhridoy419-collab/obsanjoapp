@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
 const ADMIN_USERNAME = 'admin';
-const ADMIN_PASSWORD = 'MR69550';
+const ADMIN_PASSWORD = 'HRidoy2424';
 
 export default function AdminLoginPage() {
     const router = useRouter();
