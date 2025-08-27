@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NextJSLogoRemover from "@/components/NextJSLogoRemover";
 
 export const metadata: Metadata = {
-  title: "RBW Farms Reimagined",
+  title: "Obasanjo Farms",
   description: "Modern Investment Opportunities in Farming",
 };
 
