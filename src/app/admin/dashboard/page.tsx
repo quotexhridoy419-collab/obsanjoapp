@@ -1,183 +1,145 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import InvestmentCard from '@/components/InvestmentCard';
-import Image from 'next/image';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Wallet, Landmark, Gift, Headset, CircleDollarSign, ArrowDownCircle } from 'lucide-react';
-import type { LucideProps } from 'lucide-react';
+import { Users, Package, Wallet, Landmark, UserPlus, TrendingUp, TrendingDown } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import Link from 'next/link';
-import type { ForwardRefExoticComponent, RefAttributes } from 'react';
-import { useAuth } from '@/hooks/use-auth.tsx';
 import { db } from '@/lib/firebase';
 import { ref, get } from 'firebase/database';
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
-import Autoplay from "embla-carousel-autoplay"
-import { cn } from '@/lib/utils';
 
-
-interface QuickNavItem {
-  icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>;
-  label: string;
-  href: string;
+interface StatCardProps {
+    title: string;
+    value: string | number;
+    icon: LucideIcon;
+    href: string;
 }
 
-const quickNavItems: QuickNavItem[] = [
-  { icon: Wallet, label: 'জমা', href: '/dashboard/recharge' },
-  { icon: Landmark, label: 'উত্তলন', href: '/dashboard/withdraw' },
-  { icon: Gift, label: 'বোনাস', href: '/dashboard/bonus' },
-  { icon: Headset, label: 'সেবা', href: '/dashboard/service' },
-];
-
-const QuickNavButton = ({ item }: { item: QuickNavItem }) => (
-  <Link href={item.href} className="flex flex-col items-center gap-2 text-center">
-    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary transition-transform duration-200 ease-in-out hover:scale-110">
-      <item.icon className="h-7 w-7" />
-    </div>
-    <span className="text-sm font-medium text-foreground">{item.label}</span>
-  </Link>
+const StatCard = ({ title, value, icon: Icon, href }: StatCardProps) => (
+  <Link href={href}>
+    <Card className="bg-primary text-primary-foreground transition-transform hover:scale-105">
+        <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h3 className="text-sm font-medium">{title}</h3>
+                    <p className="text-2xl font-bold">{value}</p>
+                </div>
+                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-foreground/20">
+                    <Icon className="h-6 w-6 text-primary-foreground" />
+                </div>
+            </div>
+        </CardContent>
+    </Card>
+   </Link>
 );
 
-const defaultBanner = 'https://firebasestorage.googleapis.com/v0/b/nurislam5.appspot.com/o/images%20(2).jpeg?alt=media&token=1b5d48e6-0de7-428e-bb92-039150276d4a';
+export default function AdminDashboardPage() {
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        activePackages: 0,
+        totalRecharge: 0,
+        totalWithdrawal: 0,
+        todayUsers: 0,
+        todayRecharge: 0,
+        todayWithdrawal: 0,
+    });
+    const [isLoading, setIsLoading] = useState(true);
 
-export default function DashboardPage() {
-  const { user: userData } = useAuth();
-  const [banners, setBanners] = useState<string[]>([]);
-  const [investmentOpportunities, setInvestmentOpportunities] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const plugin = useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })
-  );
-
-  useEffect(() => {
-    const fetchContent = async () => {
+    const loadStats = useCallback(async () => {
         setIsLoading(true);
         try {
-            const contentRef = ref(db, 'siteContent');
-            const snapshot = await get(contentRef);
-            
-            let finalBanners = [defaultBanner];
-            let finalInvestments: any[] = [];
-
-            if (snapshot.exists()) {
-                const content = snapshot.val();
-                const bannerUrls = content.banners 
-                    ? Object.values(content.banners).filter(url => typeof url === 'string' && url)
-                    : [];
-                if (bannerUrls.length > 0) {
-                    finalBanners = bannerUrls as string[];
-                }
-                
-                finalInvestments = content.investments ? Object.values(content.investments) : [];
+            const usersRef = ref(db, 'users');
+            const snapshot = await get(usersRef);
+            if (!snapshot.exists()) {
+                setIsLoading(false);
+                return;
             }
             
-            setBanners(finalBanners);
-            setInvestmentOpportunities(finalInvestments);
+            const usersData = snapshot.val();
+            const users = Object.values(usersData) as any[];
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const totalUsers = users.length;
+            const activePackages = users.reduce((sum: number, user: any) => sum + (user.investments?.length || 0), 0);
+
+            let totalRecharge = 0;
+            let totalWithdrawal = 0;
+            let todayRecharge = 0;
+            let todayWithdrawal = 0;
+            let todayUsers = 0;
+
+            users.forEach((user: any) => {
+                if (user.registrationDate && new Date(user.registrationDate) >= today) {
+                    todayUsers++;
+                }
+                
+                const rechargeHistory = user.rechargeHistory ? Object.values(user.rechargeHistory) : [];
+                rechargeHistory.forEach((item: any) => {
+                    if (item.status === 'সফল') {
+                        totalRecharge += item.amount;
+                        if (new Date(item.date) >= today) {
+                            todayRecharge += item.amount;
+                        }
+                    }
+                });
+
+                const withdrawalHistory = user.withdrawalHistory ? Object.values(user.withdrawalHistory) : [];
+                withdrawalHistory.forEach((item: any) => {
+                     if (item.status === 'সফল') {
+                        totalWithdrawal += item.amount;
+                        if (new Date(item.date) >= today) {
+                            todayWithdrawal += item.amount;
+                        }
+                    }
+                });
+            });
+
+            setStats({
+                totalUsers,
+                activePackages,
+                totalRecharge,
+                totalWithdrawal,
+                todayUsers,
+                todayRecharge,
+                todayWithdrawal,
+            });
         } catch (error) {
-            console.error("Error fetching site content:", error);
-            setBanners([defaultBanner]);
+            console.error("Error loading stats from Firebase:", error);
         } finally {
             setIsLoading(false);
         }
-    };
-    
-    fetchContent();
-  }, []);
-  
-  const balances = {
-      main: userData?.balance || 0,
-      recharge: userData?.rechargeBalance || 0
-  };
-  
-  const purchasedInvestmentIds = userData?.investments ? Object.values(userData.investments).map((inv: any) => inv.id) : [];
+    }, []);
 
-  return (
-    <div className="bg-background">
-      <div className="w-full p-4">
-        {isLoading ? (
-            <div className="w-full aspect-[16/9] bg-muted rounded-lg animate-pulse"></div>
-        ) : (
-            banners && banners.length > 0 && (
-                <Carousel
-                    plugins={[plugin.current]}
-                    className="w-full rounded-lg overflow-hidden"
-                    onMouseEnter={plugin.current.stop}
-                    onMouseLeave={plugin.current.reset}
-                    opts={{ loop: true }}
-                >
-                    <CarouselContent>
-                        {banners.map((src, index) => (
-                            <CarouselItem key={index}>
-                                <div className="relative w-full aspect-[16/9] bg-muted">
-                                    <Image
-                                        src={src}
-                                        alt={`Banner Image ${index + 1}`}
-                                        fill
-                                        priority={index === 0}
-                                        sizes="(max-width: 768px) 100vw, 50vw"
-                                        className="object-cover"
-                                        data-ai-hint="farm banner"
-                                    />
-                                </div>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-            )
-        )}
-      </div>
+    useEffect(() => {
+        loadStats();
+    }, [loadStats]);
 
-      <div className="container relative z-10 mx-auto max-w-3xl px-4">
-        <Card className={cn(banners.length > 0 ? "-mt-12" : "mt-4", "rounded-xl p-4 shadow-lg")}>
-          <div className="flex items-center justify-around">
-            {quickNavItems.map((item) => (
-              <QuickNavButton key={item.label} item={item} />
-            ))}
-          </div>
-        </Card>
-        
-        <Card className="mt-4 shadow-lg">
-            <CardContent className="grid grid-cols-2 gap-4 p-4 text-center">
-                <div>
-                    <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                        <CircleDollarSign size={16} />
-                        <span className="text-sm">উত্তোলন ব্যালেন্স</span>
-                    </div>
-                    <p className="text-xl font-bold text-primary">৳{balances.main.toFixed(2)}</p>
-                </div>
-                 <div>
-                    <div className="flex items-center justify-center gap-1 text-muted-foreground">
-                        <ArrowDownCircle size={16} />
-                        <span className="text-sm">রিচার্জ ব্যালেন্স</span>
-                    </div>
-                    <p className="text-xl font-bold text-accent">৳{balances.recharge.toFixed(2)}</p>
-                </div>
-            </CardContent>
-        </Card>
+    if (isLoading) {
+        return <div>ড্যাশবোর্ড লোড হচ্ছে...</div>;
+    }
 
-        <div className="mt-6 space-y-4">
-          {isLoading ? (
-            <div className="text-center p-8 text-muted-foreground">প্যাকেজ লোড হচ্ছে...</div>
-          ) : investmentOpportunities.length > 0 ? (
-            investmentOpportunities.map((item) => (
-              <InvestmentCard 
-                  key={item.id} 
-                  {...item}
-                  quotaCurrent={1} // Assuming quota is always 1 for now
-                  quotaMax={1}
-                  initialRechargeBalance={balances.recharge}
-                  isInitiallyPurchased={purchasedInvestmentIds.includes(item.id)}
-              />
-            ))
-          ) : (
-            <Card className="text-center p-8">
-              <p className="text-muted-foreground">শীঘ্রই নতুন বিনিয়োগের সুযোগ যোগ করা হবে।</p>
-            </Card>
-          )}
+    return (
+        <div className="flex flex-col gap-6">
+            <header>
+                <h1 className="text-3xl font-bold tracking-tight">ড্যাশবোর্ড</h1>
+                <p className="text-muted-foreground">আপনার সাইটের একটি সারসংক্ষেপ দেখুন।</p>
+            </header>
+            
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <StatCard title="আজকের ইউজার" value={stats.todayUsers} icon={UserPlus} href="/admin/users" />
+                <StatCard title="আজকের রিচার্জ" value={`৳${stats.todayRecharge.toLocaleString()}`} icon={TrendingUp} href="/admin/transactions?type=recharge&status=successful" />
+                <StatCard title="আজকের উত্তোলন" value={`৳${stats.todayWithdrawal.toLocaleString()}`} icon={TrendingDown} href="/admin/transactions?type=withdrawal&status=successful" />
+            </div>
+
+             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <StatCard title="মোট ব্যবহারকারী" value={stats.totalUsers} icon={Users} href="/admin/users" />
+                <StatCard title="সক্রিয় প্যাকেজ" value={stats.activePackages} icon={Package} href="/admin/users" />
+                <StatCard title="মোট রিচার্জ" value={`৳${stats.totalRecharge.toLocaleString()}`} icon={Wallet} href="/admin/transactions?type=recharge&status=successful" />
+                <StatCard title="মোট উত্তোলন" value={`৳${stats.totalWithdrawal.toLocaleString()}`} icon={Landmark} href="/admin/transactions?type=withdrawal&status=successful" />
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
