@@ -1,236 +1,204 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Briefcase, AlertTriangle, Timer, History } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import Image from 'next/image';
-import { useAuth } from '@/hooks/use-auth.tsx';
+import { Save, PlusCircle, Trash2 } from 'lucide-react';
 import { db } from '@/lib/firebase';
-import { ref, get, runTransaction, update } from 'firebase/database';
+import { ref, set, get } from 'firebase/database';
+import Image from 'next/image';
 
-interface Investment {
-  id: string; // chicken-farm etc.
-  key: string; // The unique key from Firebase (e.g., inv_1720...)
-  title: string;
-  price: number;
-  dailyIncome: number;
-  cycle: number;
-  purchaseDate: string;
-  lastClaimTime?: string;
-  image?: string;
-  dataAiHint?: string;
-}
+const defaultInvestment = {
+    id: `inv_${Date.now()}`,
+    title: 'নতুন প্যাকেজ',
+    price: 1000,
+    dailyIncome: 60,
+    cycle: 45,
+    tag: 'VIP 1',
+    image: 'https://placehold.co/80x80.png',
+    dataAiHint: 'investment',
+};
 
-const COUNTDOWN_HOURS = 24;
+const defaultBanner = 'https://firebasestorage.googleapis.com/v0/b/nurislam5.appspot.com/o/images%20(2).jpeg?alt=media&token=1b5d48e6-0de7-428e-bb92-039150276d4a';
 
-const InvestmentItem = ({ investment, onClaim }: { investment: Investment, onClaim: (investment: Investment) => void }) => {
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [canClaim, setCanClaim] = useState(false);
-  const [isClaiming, setIsClaiming] = useState(false);
+export default function AdminInvestmentSettingsPage() {
+    const { toast } = useToast();
+    const [investments, setInvestments] = useState<any[]>([]);
+    const [banners, setBanners] = useState<string[]>(['']);
+    const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const countdownDuration = COUNTDOWN_HOURS * 60 * 60 * 1000;
-    const lastClaimOrPurchaseTime = investment.lastClaimTime ? new Date(investment.lastClaimTime).getTime() : new Date(investment.purchaseDate).getTime();
-    const now = new Date().getTime();
-    
-    const timeSinceLastAction = now - lastClaimOrPurchaseTime;
-
-    if (timeSinceLastAction >= countdownDuration) {
-      setCanClaim(true);
-      setTimeLeft(0);
-    } else {
-      setCanClaim(false);
-      setTimeLeft(countdownDuration - timeSinceLastAction);
-    }
-  }, [investment]);
-
-  useEffect(() => {
-    if (timeLeft <= 0) return;
-
-    const intervalId = setInterval(() => {
-      setTimeLeft((prevTimeLeft) => {
-        if (prevTimeLeft <= 1000) {
-          setCanClaim(true);
-          clearInterval(intervalId);
-          return 0;
-        }
-        return prevTimeLeft - 1000;
-      });
-    }, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [timeLeft]);
-
-  const handleClaimClick = async () => {
-      setIsClaiming(true);
-      await onClaim(investment);
-      setIsClaiming(false);
-  }
-
-  const formatTime = (ms: number) => {
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
-  
-  const purchaseDate = new Date(investment.purchaseDate);
-  const expiryDate = new Date(purchaseDate);
-  expiryDate.setDate(purchaseDate.getDate() + investment.cycle);
-  const today = new Date();
-  const daysRemaining = Math.max(0, Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)));
-  const isValidDate = !isNaN(purchaseDate.getTime());
-
-
-  return (
-    <Card className="shadow-md overflow-hidden">
-        <div className="flex">
-            <div className="relative w-1/3 flex-shrink-0">
-                 <Image
-                    src={investment.image || "https://placehold.co/150x150.png"}
-                    alt={investment.title}
-                    fill
-                    className="object-contain"
-                    data-ai-hint={investment.dataAiHint}
-                    sizes="(max-width: 768px) 33vw, 150px"
-                    onError={(e) => e.currentTarget.src = 'https://placehold.co/150x150.png'}
-                />
-            </div>
-            <CardContent className="p-4 flex flex-col gap-4 flex-grow">
-                <div>
-                    <h3 className="font-bold text-lg text-foreground">{investment.title}</h3>
-                    {isValidDate && <p className="text-sm text-muted-foreground">কেনার তারিখ: {purchaseDate.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</p>}
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                        <p className="text-muted-foreground">দৈনিক আয়</p>
-                        <p className="font-semibold text-primary">৳{investment.dailyIncome.toFixed(2)}</p>
-                    </div>
-                    <div>
-                        <p className="text-muted-foreground">বাকি দিন</p>
-                        <p className="font-semibold text-primary">{daysRemaining} দিন</p>
-                    </div>
-                </div>
-                <div className="text-center space-y-2">
-                    <p className="text-sm text-muted-foreground flex items-center justify-center gap-1"><Timer size={16} /> পরবর্তী আয়</p>
-                    <div className="text-2xl font-mono font-bold text-accent">
-                        {formatTime(timeLeft)}
-                    </div>
-                </div>
-                <Button onClick={handleClaimClick} disabled={!canClaim || isClaiming} className="w-full font-bold">
-                {isClaiming ? 'প্রসেসিং...' : canClaim ? 'আয় সংগ্রহ করুন' : 'অপেক্ষা করুন'}
-                </Button>
-            </CardContent>
-        </div>
-    </Card>
-  )
-}
-
-
-export default function InvestmentsPage() {
-  const [investments, setInvestments] = useState<Investment[]>([]);
-  const { toast } = useToast();
-  const { user, isLoading, refetchUser } = useAuth();
-
-  useEffect(() => {
-    if (user) {
+    const loadData = useCallback(async () => {
+        setIsLoading(true);
         try {
-            const userInvestmentsData = user.investments || {};
-            const userInvestments = Object.keys(userInvestmentsData).map((key: any) => ({
-                ...userInvestmentsData[key],
-                key: key,
-            }));
-            setInvestments(userInvestments);
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'ত্রুটি', description: 'বিনিয়োগের তথ্য আনতে সমস্যা হয়েছে।' });
-        }
-    }
-  }, [user, toast]);
-
-
-  const handleClaimIncome = async (investmentToClaim: Investment) => {
-    if (!user) return;
-    
-    try {
-        const userRef = ref(db, `users/${user.id}`);
-        await runTransaction(userRef, (currentUser) => {
-            if (currentUser) {
-                // Update balances
-                currentUser.balance = (currentUser.balance || 0) + investmentToClaim.dailyIncome;
-                currentUser.totalIncome = (currentUser.totalIncome || 0) + investmentToClaim.dailyIncome;
-
-                // Update investment last claim time
-                if (currentUser.investments && currentUser.investments[investmentToClaim.key]) {
-                    currentUser.investments[investmentToClaim.key].lastClaimTime = new Date().toISOString();
-                }
-
-                // Add to income history
-                 const newIncomeRecord = {
-                    investmentTitle: investmentToClaim.title,
-                    amount: investmentToClaim.dailyIncome,
-                    date: new Date().toISOString(),
-                };
-                if (!currentUser.incomeHistory) {
-                    currentUser.incomeHistory = {};
-                }
-                const newHistoryKey = `income_${Date.now()}`;
-                currentUser.incomeHistory[newHistoryKey] = newIncomeRecord;
+            const contentRef = ref(db, 'siteContent');
+            const snapshot = await get(contentRef);
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                setInvestments(data.investments || [defaultInvestment]);
+                const bannerUrls = data.banners ? Object.values(data.banners).filter(url => typeof url === 'string' && url) : [];
+                setBanners(bannerUrls.length > 0 ? bannerUrls as string[] : [defaultBanner]);
+            } else {
+                setInvestments([defaultInvestment]);
+                setBanners([defaultBanner]);
             }
-            return currentUser;
-        });
+        } catch (error) {
+            console.error("Error fetching site content:", error);
+            toast({ variant: 'destructive', title: 'ত্রুটি', description: 'সাইটের তথ্য আনতে সমস্যা হয়েছে।' });
+        } finally {
+            setIsLoading(false);
+        }
+    }, [toast]);
 
-        refetchUser(); // This will trigger a re-render and update the investment list
-        toast({
-            title: 'আয় সংগ্রহ সফল!',
-            description: `আপনার অ্যাকাউন্টে ৳${investmentToClaim.dailyIncome.toFixed(2)} যোগ করা হয়েছে।`,
-        });
-    } catch (error) {
-        toast({ variant: 'destructive', title: 'ত্রুটি', description: 'আয় সংগ্রহ করতে সমস্যা হয়েছে।' });
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+    const handleInvestmentChange = (index: number, field: string, value: string | number) => {
+        const updatedInvestments = [...investments];
+        updatedInvestments[index] = { ...updatedInvestments[index], [field]: value };
+        setInvestments(updatedInvestments);
+    };
+    
+    const handleBannerChange = (index: number, value: string) => {
+        const updatedBanners = [...banners];
+        updatedBanners[index] = value;
+        setBanners(updatedBanners);
+    };
+
+    const addInvestment = () => {
+        setInvestments([...investments, { ...defaultInvestment, id: `inv_${Date.now()}` }]);
+    };
+    
+    const removeInvestment = (index: number) => {
+        const updatedInvestments = investments.filter((_, i) => i !== index);
+        setInvestments(updatedInvestments);
+    };
+
+    const addBanner = () => {
+        setBanners([...banners, '']);
+    };
+    
+    const removeBanner = (index: number) => {
+        const updatedBanners = banners.filter((_, i) => i !== index);
+        setBanners(updatedBanners);
+    };
+
+
+    const handleSaveChanges = async () => {
+        setIsLoading(true);
+        try {
+            const investmentsWithCalculatedIncome = investments.map(inv => ({
+                ...inv,
+                totalIncome: Number(inv.price) * (Number(inv.dailyIncome) / (Number(inv.price) / 100)) * Number(inv.cycle) / 100
+            }));
+            
+            const dataToSave = {
+                investments: investmentsWithCalculatedIncome,
+                banners: banners.filter(url => url.trim() !== ''),
+            };
+            
+            await set(ref(db, 'siteContent'), dataToSave);
+            toast({ title: 'সফল', description: 'তথ্য সফলভাবে সেভ করা হয়েছে।' });
+        } catch (error) {
+            console.error("Error saving content:", error);
+            toast({ variant: 'destructive', title: 'ত্রুটি', description: 'তথ্য সেভ করতে সমস্যা হয়েছে।' });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    if (isLoading) {
+        return <div>লোড হচ্ছে...</div>;
     }
-  }
 
-  if (isLoading) {
-    return <div className="flex h-screen items-center justify-center">লোড হচ্ছে...</div>;
-  }
+    return (
+        <div className="flex flex-col gap-6">
+            <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">ইনভেস্টমেন্ট সেটিংস</h1>
+                    <p className="text-muted-foreground">ব্যানার এবং ইনভেস্টমেন্ট প্যাকেজ পরিচালনা করুন।</p>
+                </div>
+                <Button onClick={handleSaveChanges} disabled={isLoading}>
+                    <Save className="mr-2 h-4 w-4" />
+                    {isLoading ? 'সেভ হচ্ছে...' : 'পরিবর্তন সেভ করুন'}
+                </Button>
+            </header>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>ব্যানার ম্যানেজমেন্ট</CardTitle>
+                    <CardDescription>ড্যাশবোর্ডে প্রদর্শিত ব্যানার যোগ বা পরিবর্তন করুন।</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    {banners.map((banner, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                            <Input
+                                type="text"
+                                placeholder="ব্যানার ইমেজের URL দিন"
+                                value={banner}
+                                onChange={(e) => handleBannerChange(index, e.target.value)}
+                            />
+                            <Button variant="destructive" size="icon" onClick={() => removeBanner(index)}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    ))}
+                    <Button variant="outline" onClick={addBanner}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        নতুন ব্যানার যোগ করুন
+                    </Button>
+                </CardContent>
+            </Card>
 
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="flex items-center justify-between bg-primary p-4 text-primary-foreground">
-        <Link href="/dashboard" className="text-primary-foreground">
-          <ArrowLeft className="h-6 w-6" />
-        </Link>
-        <h1 className="flex-grow text-center font-headline text-xl font-bold">আমার বিনিয়োগ</h1>
-        <Link href="/dashboard/investments/history" className="text-primary-foreground">
-          <History className="h-6 w-6" />
-        </Link>
-      </header>
-
-      <main className="container mx-auto max-w-3xl p-4">
-        {investments.length > 0 ? (
-          <div className="space-y-4">
-            {investments.map((item) => (
-                <InvestmentItem key={item.key} investment={item} onClaim={handleClaimIncome} />
-            ))}
-          </div>
-        ) : (
-          <Card className="shadow-lg">
-            <CardContent className="flex flex-col items-center justify-center gap-4 py-12">
-              <AlertTriangle className="h-16 w-16 text-destructive" />
-              <p className="text-lg font-medium text-muted-foreground text-center">
-                আপনার কোনো সক্রিয় বিনিয়োগ নেই।
-              </p>
-              <Button asChild>
-                <Link href="/dashboard">এখনই বিনিয়োগ করুন</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </main>
-    </div>
-  );
+            <Card>
+                <CardHeader>
+                    <CardTitle>ইনভেস্টমেন্ট প্যাকেজ</CardTitle>
+                    <CardDescription>ব্যবহারকারীদের জন্য ইনভেস্টমেন্ট প্যাকেজ তৈরি ও সম্পাদনা করুন।</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    {investments.map((inv, index) => (
+                        <div key={index} className="p-4 border rounded-lg space-y-4 relative">
+                            <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-7 w-7" onClick={() => removeInvestment(index)}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>প্যাকেজের নাম</Label>
+                                    <Input value={inv.title} onChange={(e) => handleInvestmentChange(index, 'title', e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>দাম (Price)</Label>
+                                    <Input type="number" value={inv.price} onChange={(e) => handleInvestmentChange(index, 'price', Number(e.target.value))} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>দৈনিক আয় (Daily Income)</Label>
+                                    <Input type="number" value={inv.dailyIncome} onChange={(e) => handleInvestmentChange(index, 'dailyIncome', Number(e.target.value))} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>সাইকেল (দিন)</Label>
+                                    <Input type="number" value={inv.cycle} onChange={(e) => handleInvestmentChange(index, 'cycle', Number(e.target.value))} />
+                                </div>
+                                 <div className="space-y-2">
+                                    <Label>ট্যাগ (e.g., VIP 1)</Label>
+                                    <Input value={inv.tag} onChange={(e) => handleInvestmentChange(index, 'tag', e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>ছবি URL</Label>
+                                    <Input value={inv.image} onChange={(e) => handleInvestmentChange(index, 'image', e.target.value)} />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    <Button variant="outline" onClick={addInvestment}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        নতুন প্যাকেজ যোগ করুন
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+    );
 }
