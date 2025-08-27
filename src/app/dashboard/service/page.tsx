@@ -1,86 +1,23 @@
-
-'use client';
-
-import Link from 'next/link';
-import { ArrowLeft, ChevronRight, Send } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
-import { ref, get } from 'firebase/database';
-
-interface ServiceItem {
-  icon: LucideIcon;
-  label: string;
-  description: string;
-  href: string;
-}
-
-const ServiceMenuItem = ({ item }: { item: ServiceItem }) => (
-    <Link href={item.href} target="_blank" rel="noopener noreferrer">
-        <div className="flex items-center p-4 transition-colors hover:bg-muted/50">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <item.icon className="h-5 w-5" />
-            </div>
-            <div className="ml-4 flex-grow">
-                <span className="font-medium text-foreground">{item.label}</span>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-            </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
-        </div>
-    </Link>
-);
-
-export default function ServicePage() {
-  const [serviceItems, setServiceItems] = useState<ServiceItem[]>([
-      { icon: Send, label: 'সাহায্য কেন্দ্র', description: 'সকাল ৯ টা থেকে সন্ধ্যা ৬টা পর্যন্ত', href: '#' },https://t.me/Hridoy_mirza559
-      { icon: Send, label: 'অফিসিয়াল গ্রুপ', description: 'সকাল দশটা থেকে বিকাল পাঁচটা পর্যন্ত', href: '#' },https://t.me/OBASANJO_FARMS
-      { icon: Send, label: 'অফিসিয়াল চ্যানেল', description: 'সব সময় আপডেট দেখতে পারবেন', href: '#' },https://t.me/obasanjo_farms_bd
-  ]);
-
-  useEffect(() => {
-    const fetchServiceLinks = async () => {
-        try {
-            const contentRef = ref(db, 'siteContent/serviceLinks');
-            const snapshot = await get(contentRef);
-            if (snapshot.exists()) {
-                const storedLinks = snapshot.val();
-                setServiceItems([
-                    { ...serviceItems[0], href: storedLinks.helpCenter || '#' },
-                    { ...serviceItems[1], href: storedLinks.officialGroup || '#' },
-                    { ...serviceItems[2], href: storedLinks.officialChannel || '#' },
-                ]);
-            }
-        } catch (error) {
-            console.error("Error fetching service links from Firebase:", error);
-        }
-    };
-    fetchServiceLinks();
-  }, []);
-
-  return (
-    <div className="min-h-screen bg-background">
-      <header className="flex items-center bg-primary p-4 text-primary-foreground">
-        <Link href="/dashboard" className="text-primary-foreground">
-          <ArrowLeft className="h-6 w-6" />
-        </Link>
-        <h1 className="flex-grow text-center font-headline text-xl font-bold">গ্রাহক সেবা</h1>
-        <div className="w-6"></div>
-      </header>
-
-      <main className="container mx-auto max-w-3xl p-4">
-        <Card className="shadow-lg">
-           <CardHeader>
-            <CardTitle>সহায়তা ও সমর্থন</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-             <div className="divide-y divide-border">
-                {serviceItems.map((item) => (
-                    <ServiceMenuItem key={item.label} item={item} />
-                ))}
-            </div>
-          </CardContent>
-        </Card>
+const services: ServiceItem[] = [
+  {
+    icon: Send,
+    label: "সাহায্য কেন্দ্র",
+    description: "যেকোনো প্রশ্নের জন্য আমাদের Telegram সাপোর্টে যোগাযোগ করুন",
+    href: "https://t.me/Hridoy_mirza559"   // 👉 সাহায্য কেন্দ্র (User ID)
+  },
+  {
+    icon: Send,
+    label: "অফিসিয়াল গ্রুপ",
+    description: "আমাদের অফিসিয়াল Telegram গ্রুপে যোগ দিন",
+    href: "https://t.me/OBASANJO_FARMS"   // 👉 অফিসিয়াল গ্রুপ
+  },
+  {
+    icon: Send,
+    label: "অফিসিয়াল চ্যানেল",
+    description: "সর্বশেষ আপডেট পেতে আমাদের অফিসিয়াল Telegram চ্যানেল ফলো করুন",
+    href: "https://t.me/obasanjo_farms_bd"   // 👉 অফিসিয়াল চ্যানেল
+  }
+];
 
         <Card className="mt-6 shadow-lg">
           <CardHeader>
