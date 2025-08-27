@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 142.1 70% 45%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 142.1 76.2% 36.3%;
+    --radius: 0.5rem;
+  }
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 355.7 100% 97.3%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 142.1 70% 45%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 142.1 76.2% 36.3%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Prevent zooming on mobile */
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  /* Hide Next.js development indicators and logo - More specific targeting */
+  #__next-build-watcher,
+  #__next-prerender-indicator,
+  /* Hide Next.js logo specifically - only target the actual logo */
+  div[style*="position: fixed"][style*="bottom"][style*="left"][style*="z-index: 9999"],
+  div[style*="position: fixed"][style*="bottom"][style*="left"][style*="z-index: 2147483647"],
+  div[style*="position: fixed"][style*="bottom"][style*="right"][style*="z-index: 9999"],
+  div[style*="position: fixed"][style*="bottom"][style*="right"][style*="z-index: 2147483647"],
+  /* Hide development mode indicators */
+  .nextjs-toast-errors-parent,
+  .nextjs-toast-errors-parent > div,
+  /* Hide any element with Next.js branding in title */
+  div[title*="Next.js"],
+  div[title*="next"],
+  div[title*="Next"],
+  /* Hide any element that might be the development indicator */
+  div[role="button"][style*="position: fixed"][style*="bottom"],
+  div[tabindex][style*="position: fixed"][style*="bottom"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+  
+  /* Ultra-specific Next.js logo removal - only target the actual logo */
+  body > div:last-child:not([data-nextjs-router-viewport]):not([data-nextjs-toaster]):not([data-nextjs-toaster]):has(svg),
+  body > div[style*="position: fixed"][style*="bottom"][style*="left"]:not([data-nextjs-router-viewport]):not([data-nextjs-toaster]),
+  body > div[style*="position: fixed"][style*="bottom"][style*="right"]:not([data-nextjs-router-viewport]):not([data-nextjs-toaster]),
+  /* Hide any element that looks like the Next.js logo with specific positioning */
+  div[style*="position: fixed"][style*="bottom"][style*="left"][style*="z-index: 9999"],
+  div[style*="position: fixed"][style*="bottom"][style*="left"][style*="z-index: 2147483647"],
+  div[style*="position: fixed"][style*="bottom"][style*="right"][style*="z-index: 9999"],
+  div[style*="position: fixed"][style*="bottom"][style*="right"][style*="z-index: 2147483647"],
+  /* Hide any element that might be the logo based on content - only if it's positioned at bottom */
+  div[style*="position: fixed"][style*="bottom"]:has(svg[viewBox*="24"]),
+  div[style*="position: fixed"][style*="bottom"]:has(svg[width="24"]),
+  div[style*="position: fixed"][style*="bottom"]:has(svg[height="24"]) {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+}
