@@ -33,9 +33,9 @@ const ServiceMenuItem = ({ item }: { item: ServiceItem }) => (
 
 export default function ServicePage() {
   const [serviceItems, setServiceItems] = useState<ServiceItem[]>([
-      { icon: Send, label: 'সাহায্য কেন্দ্র', description: 'সকাল ৯ টা থেকে সন্ধ্যা ৬টা পর্যন্ত', href: '#' },
-      { icon: Send, label: 'অফিসিয়াল গ্রুপ', description: 'সকাল দশটা থেকে বিকাল পাঁচটা পর্যন্ত', href: '#' },
-      { icon: Send, label: 'অফিসিয়াল চ্যানেল', description: 'সব সময় আপডেট দেখতে পারবেন', href: '#' },
+      { icon: Send, label: 'সাহায্য কেন্দ্র', description: 'সকাল ৯ টা থেকে সন্ধ্যা ৬টা পর্যন্ত', href: '#' },@Hridoy_mirza559
+      { icon: Send, label: 'অফিসিয়াল গ্রুপ', description: 'সকাল দশটা থেকে বিকাল পাঁচটা পর্যন্ত', href: '#' },https://t.me/OBASANJO_FARMS
+      { icon: Send, label: 'অফিসিয়াল চ্যানেল', description: 'সব সময় আপডেট দেখতে পারবেন', href: '#' },https://t.me/obasanjo_farms_bd
   ]);
 
   useEffect(() => {
