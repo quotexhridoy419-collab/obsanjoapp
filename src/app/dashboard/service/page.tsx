@@ -1,101 +1,90 @@
-"use client";
-
-import Link from "next/link";
+import { ArrowRight, Send } from "lucide-react";
 import Image from "next/image";
-import { ArrowLeft, ChevronRight } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
-interface ServiceItem {
-  label: string;
-  description: string;
-  href: string;
-}
-
-const services: ServiceItem[] = [
-  {
-    label: "সাহায্য কেন্দ্র",
-    description: "যেকোনো প্রশ্নের জন্য আমাদের Telegram সাপোর্টে যোগাযোগ করুন",
-    href: "https://t.me/Hridoy_mirza559"
-  },
-  {
-    label: "অফিসিয়াল গ্রুপ",
-    description: "আমাদের অফিসিয়াল Telegram গ্রুপে যোগ দিন",
-    href: "https://t.me/OBASANJO_FARMS"
-  },
-  {
-    label: "অফিসিয়াল চ্যানেল",
-    description: "সর্বশেষ আপডেট পেতে আমাদের অফিসিয়াল Telegram চ্যানেল ফলো করুন",
-    href: "https://t.me/obasanjo_farms_bd"
-  }
-];
-
-const ServiceMenuItem = ({ item }: { item: ServiceItem }) => (
-  <Link
-    href={item.href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex items-center p-4 border rounded-xl hover:bg-gray-50 transition"
-  >
-    {/* Telegram Logo */}
-    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-      <Image
-        src="/telegram-logo.png" // 👉 এখানে public/telegram-logo.png রাখতে হবে
-        alt="Telegram"
-        width={24}
-        height={24}
-      />
-    </div>
-
-    <div className="ml-4 flex-grow">
-      <span className="font-medium text-gray-900">{item.label}</span>
-      <p className="text-sm text-gray-500">{item.description}</p>
-    </div>
-
-    <ChevronRight className="h-5 w-5 text-gray-400" />
-  </Link>
-);
 
 export default function ServicePage() {
   return (
-    <div className="bg-white min-h-screen">
-      <div className="container mx-auto max-w-2xl p-6">
-        {/* Header */}
-        <div className="flex items-center mb-6">
-          <ArrowLeft className="mr-2 h-5 w-5 text-gray-500" />
-          <h1 className="text-xl font-bold">গ্রাহক সেবা</h1>
-        </div>
+    <div className="max-w-2xl mx-auto p-4">
+      {/* হেডার */}
+      <h1 className="text-xl font-bold mb-4 text-center text-green-700">গ্রাহক সেবা</h1>
 
-        {/* Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>আমাদের সাপোর্ট অপশন</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {services.map((item, index) => (
-              <ServiceMenuItem key={index} item={item} />
-            ))}
-          </CardContent>
-        </Card>
+      {/* সাহায্য ও সমর্থন */}
+      <div className="bg-white shadow rounded-xl p-4 mb-6">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">সাহাযতা ও সমর্থন</h2>
 
-        {/* Warning Notice */}
-        <div className="mt-6 p-4 border rounded-lg bg-gray-50">
-          <h2 className="text-gray-800 font-semibold mb-2">
-            ⚠️ সতর্কতা: প্রতারণা থেকে সাবধান থাকুন!
-          </h2>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            আমাদের অফিসিয়াল গ্রাহক সেবা কেবলমাত্র উপরে দেওয়া Telegram সাহায্য কেন্দ্র, 
-            অফিসিয়াল গ্রুপ ও অফিসিয়াল চ্যানেলের মাধ্যমেই পরিচালিত হয়।  
-            অন্য কোনো লিঙ্ক, ফোন নম্বর বা আইডি থেকে যোগাযোগ করলে সেটি প্রতারণা হতে পারে।
-          </p>
-          <ul className="text-sm text-gray-700 mt-2 list-disc list-inside space-y-1">
-            <li>সবসময় আমাদের অফিসিয়াল লিঙ্ক ব্যবহার করুন।</li>
-            <li>ব্যক্তিগতভাবে টাকা পাঠানোর আগে ভালোভাবে যাচাই করুন।</li>
-            <li>সন্দেহজনক বার্তা পেলে আমাদের সাহায্য কেন্দ্রে রিপোর্ট করুন।</li>
-          </ul>
-          <p className="mt-2 text-sm font-medium text-gray-800">
-            ✅ মনে রাখবেন: অফিসিয়াল যোগাযোগের জন্য কেবল এই পেজে দেওয়া লিঙ্কগুলোই ব্যবহারযোগ্য।
-          </p>
+        <div className="space-y-3">
+          <a
+            href="https://t.me/Hridoy_mirza559"
+            target="_blank"
+            className="flex items-center justify-between border p-3 rounded-lg hover:bg-gray-50 transition"
+          >
+            <div className="flex items-center space-x-3">
+              <Image src="/telegram-logo.png" alt="Telegram" width={28} height={28} />
+              <div>
+                <p className="font-medium text-gray-800">সাহায্য কেন্দ্র</p>
+                <p className="text-sm text-gray-500">সকাল ৯ টা থেকে সন্ধ্যা ৬ টা পর্যন্ত</p>
+              </div>
+            </div>
+            <ArrowRight className="text-gray-400" />
+          </a>
+
+          <a
+            href="https://t.me/OBASANJO_FARMS"
+            target="_blank"
+            className="flex items-center justify-between border p-3 rounded-lg hover:bg-gray-50 transition"
+          >
+            <div className="flex items-center space-x-3">
+              <Image src="/telegram-logo.png" alt="Telegram" width={28} height={28} />
+              <div>
+                <p className="font-medium text-gray-800">অফিসিয়াল গ্রুপ</p>
+                <p className="text-sm text-gray-500">সকাল ১০ টা থেকে বিকাল ৫ টা পর্যন্ত</p>
+              </div>
+            </div>
+            <ArrowRight className="text-gray-400" />
+          </a>
+
+          <a
+            href="https://t.me/obasanjo_farms_bd"
+            target="_blank"
+            className="flex items-center justify-between border p-3 rounded-lg hover:bg-gray-50 transition"
+          >
+            <div className="flex items-center space-x-3">
+              <Image src="/telegram-logo.png" alt="Telegram" width={28} height={28} />
+              <div>
+                <p className="font-medium text-gray-800">অফিসিয়াল চ্যানেল</p>
+                <p className="text-sm text-gray-500">সব সময় আপডেট দেখতে পারবেন</p>
+              </div>
+            </div>
+            <ArrowRight className="text-gray-400" />
+          </a>
         </div>
+      </div>
+
+      {/* গুরুত্বপূর্ণ পরামর্শ */}
+      <div className="bg-white shadow rounded-xl p-4">
+        <h2 className="text-lg font-semibold text-gray-800 mb-2">গুরুত্বপূর্ণ পরামর্শ</h2>
+        <p className="text-sm text-gray-600 mb-4">নিরাপদ থাকুন এবং সঠিক উপায়ে সাহায্য নিন।</p>
+
+        <h3 className="font-medium text-gray-800 mb-2">কেন আমাদের সাথে যোগাযোগ করবেন?</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          যেকোনো ধরণের অ্যাকাউন্ট, রিচার্জ বা উত্তোলন সংক্রান্ত সমস্যার দ্রুত এবং নির্ভরযোগ্য সমাধানের জন্য
+          শুধুমাত্র আমাদের অফিসিয়াল গ্রাহক সেবা ব্যবহার করুন।
+        </p>
+
+        <h3 className="font-medium text-gray-800 mb-2">কিভাবে প্রতারণা থেকে বাঁচবেন?</h3>
+        <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+          <li>
+            প্ল্যাটফর্মের কোনো প্রতিনিধি বা এডমিন কখনো আপনার পাসওয়ার্ড, পিন বা ব্যক্তিগত তথ্য চাইবে না।
+          </li>
+          <li>
+            অপরিচিত কোনো নম্বর বা সোশ্যাল মিডিয়া থেকে আসা মেসেজে উত্তর দেবেন না, তারা এডমিন দাবি করলেও।
+          </li>
+          <li>
+            শুধুমাত্র উপরে তালিকাভুক্ত অফিসিয়াল চ্যানেলের মাধ্যমেই যোগাযোগ করুন।
+          </li>
+          <li>
+            আপনার লগইন তথ্য বা লেনদেন সম্পর্কিত পাসওয়ার্ড কারও সাথে শেয়ার করবেন না।
+          </li>
+        </ul>
       </div>
     </div>
   );
