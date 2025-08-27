@@ -6,7 +6,7 @@ import NextJSLogoRemover from "@/components/NextJSLogoRemover";
 
 export const metadata: Metadata = {
   title: "Obasanjo Farms",
-  description: "Modern Investment Opportunities in Farming",
+  description: "Modern Investment Opportunities in Obasanjo Farming",
 };
 
 export const viewport = {
