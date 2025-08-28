@@ -1,5 +1,5 @@
 import Image from "next/image";
-import logoLinks from "./data/logoLinks.json";  
+import logoLinks from "@/data/logoLinks.json";  
 
 export default function ProfileLogo() {
   return (
