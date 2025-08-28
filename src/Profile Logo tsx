@@ -1,0 +1,18 @@
+import React from "react";
+import logoLinks from "./data/logoLinks.json"; // <-- src/data থেকে ইমপোর্ট
+
+export default function ProfilePage() {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <h1 className="text-2xl font-bold mb-4">My Profile</h1>
+      
+      <img
+        src={logoLinks.profileLogo}
+        alt="Profile Logo"
+        width={120}
+        height={40}
+        className="rounded-xl shadow-md"
+      />
+    </div>
+  );
+}
