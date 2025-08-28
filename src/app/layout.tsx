@@ -1,7 +1,7 @@
 "use client";
 
 import "./globals.css";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function RootLayout({
   children,
@@ -11,8 +11,12 @@ export default function RootLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 3000); // ৩ সেকেন্ড পরে হাইড হবে
-    return () => clearTimeout(timer);
+    // যখনই page load হবে, তখন loader আসবে
+    if (document.readyState === "complete") {
+      setLoading(false);
+    } else {
+      window.addEventListener("load", () => setLoading(false));
+    }
   }, []);
 
   return (
@@ -20,7 +24,7 @@ export default function RootLayout({
       <body>
         {loading ? (
           <div className="flex items-center justify-center h-screen bg-white">
-            <div className="animate-spin rounded-full h-24 w-24 border-t-4 border-green-600"></div>
+            <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-green-600"></div>
           </div>
         ) : (
           children
@@ -29,3 +33,4 @@ export default function RootLayout({
     </html>
   );
 }
+w
