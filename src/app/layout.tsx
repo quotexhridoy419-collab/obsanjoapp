@@ -11,11 +11,15 @@ export default function RootLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // যখনই page load হবে, তখন loader আসবে
-    if (document.readyState === "complete") {
-      setLoading(false);
-    } else {
-      window.addEventListener("load", () => setLoading(false));
+    // window/document শুধুমাত্র client-side এ ব্যবহার করা হচ্ছে
+    if (typeof window !== "undefined" && typeof document !== "undefined") {
+      if (document.readyState === "complete") {
+        setLoading(false);
+      } else {
+        const handleLoad = () => setLoading(false);
+        window.addEventListener("load", handleLoad);
+        return () => window.removeEventListener("load", handleLoad);
+      }
     }
   }, []);
 
@@ -33,4 +37,3 @@ export default function RootLayout({
     </html>
   );
 }
-w
