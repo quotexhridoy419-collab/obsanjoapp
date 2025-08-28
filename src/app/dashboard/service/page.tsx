@@ -1,5 +1,4 @@
 import { ArrowRight, Send } from "lucide-react";
-import Image from "next/image";
 
 export default function ServicePage() {
   return (
@@ -18,7 +17,7 @@ export default function ServicePage() {
             className="flex items-center justify-between border p-3 rounded-lg hover:bg-gray-50 transition"
           >
             <div className="flex items-center space-x-3">
-              <Image src="/telegram-logo.png" alt="Telegram" width={28} height={28} />
+              <Send className="text-blue-500" size={28} />
               <div>
                 <p className="font-medium text-gray-800">সাহায্য কেন্দ্র</p>
                 <p className="text-sm text-gray-500">সকাল ৯ টা থেকে সন্ধ্যা ৬ টা পর্যন্ত</p>
@@ -33,7 +32,7 @@ export default function ServicePage() {
             className="flex items-center justify-between border p-3 rounded-lg hover:bg-gray-50 transition"
           >
             <div className="flex items-center space-x-3">
-              <Image src="/telegram-logo.png" alt="Telegram" width={28} height={28} />
+              <Send className="text-blue-500" size={28} />
               <div>
                 <p className="font-medium text-gray-800">অফিসিয়াল গ্রুপ</p>
                 <p className="text-sm text-gray-500">সকাল ১০ টা থেকে বিকাল ৫ টা পর্যন্ত</p>
@@ -48,7 +47,7 @@ export default function ServicePage() {
             className="flex items-center justify-between border p-3 rounded-lg hover:bg-gray-50 transition"
           >
             <div className="flex items-center space-x-3">
-              <Image src="/telegram-logo.png" alt="Telegram" width={28} height={28} />
+              <Send className="text-blue-500" size={28} />
               <div>
                 <p className="font-medium text-gray-800">অফিসিয়াল চ্যানেল</p>
                 <p className="text-sm text-gray-500">সব সময় আপডেট দেখতে পারবেন</p>
@@ -72,18 +71,10 @@ export default function ServicePage() {
 
         <h3 className="font-medium text-gray-800 mb-2">কিভাবে প্রতারণা থেকে বাঁচবেন?</h3>
         <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
-          <li>
-            প্ল্যাটফর্মের কোনো প্রতিনিধি বা এডমিন কখনো আপনার পাসওয়ার্ড, পিন বা ব্যক্তিগত তথ্য চাইবে না।
-          </li>
-          <li>
-            অপরিচিত কোনো নম্বর বা সোশ্যাল মিডিয়া থেকে আসা মেসেজে উত্তর দেবেন না, তারা এডমিন দাবি করলেও।
-          </li>
-          <li>
-            শুধুমাত্র উপরে তালিকাভুক্ত অফিসিয়াল চ্যানেলের মাধ্যমেই যোগাযোগ করুন।
-          </li>
-          <li>
-            আপনার লগইন তথ্য বা লেনদেন সম্পর্কিত পাসওয়ার্ড কারও সাথে শেয়ার করবেন না।
-          </li>
+          <li>প্ল্যাটফর্মের কোনো প্রতিনিধি বা এডমিন কখনো আপনার পাসওয়ার্ড, পিন বা ব্যক্তিগত তথ্য চাইবে না।</li>
+          <li>অপরিচিত কোনো নম্বর বা সোশ্যাল মিডিয়া থেকে আসা মেসেজে উত্তর দেবেন না, তারা এডমিন দাবি করলেও।</li>
+          <li>শুধুমাত্র উপরে তালিকাভুক্ত অফিসিয়াল চ্যানেলের মাধ্যমেই যোগাযোগ করুন।</li>
+          <li>আপনার লগইন তথ্য বা লেনদেন সম্পর্কিত পাসওয়ার্ড কারও সাথে শেয়ার করবেন না।</li>
         </ul>
       </div>
     </div>
