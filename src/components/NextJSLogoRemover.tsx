@@ -41,8 +41,8 @@ export default function NextJSLogoRemover() {
               el.style.position = 'absolute';
               el.style.left = '-9999px';
               el.style.top = '-9999px';
-              el.style.width = '0';
-              el.style.height = '0';
+              el.style.width = '120';
+              el.style.height = '40';
               el.style.overflow = 'hidden';
             }
           });
